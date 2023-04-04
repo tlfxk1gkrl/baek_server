@@ -23,8 +23,10 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
-    public UserEntity(String username, String name) {
+    @Builder
+    public UserEntity(String username, String name, String password) {
         this.username = username;
         this.name = name;
+        this.password = password;
     }
 }

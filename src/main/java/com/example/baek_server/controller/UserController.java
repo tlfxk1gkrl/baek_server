@@ -1,41 +1,61 @@
 package com.example.baek_server.controller;
 
 import com.example.baek_server.entity.UserEntity;
-import com.example.baek_server.service.UserRepository;
+import com.example.baek_server.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
 public class UserController {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     /**
      * select all
      * @return
      */
-    @GetMapping("user")
-    public List<UserEntity> findAllMember() {
+    @GetMapping("/user")
+    public List<UserEntity> findAllUser() {
         return userRepository.findAll();
+    }
+
+    /**
+     * login
+     *
+     * @return
+     */
+    @PostMapping("/login")
+    public String login(@RequestBody UserEntity user) {
+        if (userRepository.existsByUsername(user.getUsername())){
+            UserEntity tempUser = userRepository.findByUsername(user.getUsername());
+            if(passwordEncoder.matches(user.getPassword(),tempUser.getPassword())){
+                return tempUser.getName();
+            }
+        }
+        return "not user";
     }
 
     /**
      * create
      * @return
      */
-    @PostMapping("user")
-    public UserEntity signUp() {
+    @PostMapping("/create")
+    public UserEntity createUser(@RequestBody UserEntity user) {
+        String encodePw = passwordEncoder.encode(user.getPassword());
         final UserEntity member = UserEntity.builder()
-                .username("test_user@gmail.com")
-                .name("test user")
-                .password("1234")
+                .username(user.getUsername())
+                .name(user.getName())
+                .password(encodePw)
                 .build();
         return userRepository.save(member);
     }
