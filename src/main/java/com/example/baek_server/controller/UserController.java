@@ -1,6 +1,7 @@
 package com.example.baek_server.controller;
 
 import com.example.baek_server.entity.UserEntity;
+import com.example.baek_server.mylib.BaeksLibrary;
 import com.example.baek_server.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@CrossOrigin("*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
@@ -20,6 +22,11 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TokenController tokenController;
+
+    private BaeksLibrary library = new BaeksLibrary();
     /**
      * select all
      * @return
@@ -39,10 +46,10 @@ public class UserController {
         if (userRepository.existsByUsername(user.getUsername())){
             UserEntity tempUser = userRepository.findByUsername(user.getUsername());
             if(passwordEncoder.matches(user.getPassword(),tempUser.getPassword())){
-                return tempUser.getName();
+                return user.getName();
             }
         }
-        return "not user";
+        return "Error";
     }
 
     /**
